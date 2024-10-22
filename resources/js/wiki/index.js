@@ -1,0 +1,10 @@
+import './wikiApi';
+import './saveToDataBase';
+import './showParseWikiResult';
+import './loadArticles';
+import './findArticle';
+import './showArticleText';
+import './progressBar';
+import './displaySearchResults';
+import './cleanParserString';
+import './showArticleTextFromDB';
