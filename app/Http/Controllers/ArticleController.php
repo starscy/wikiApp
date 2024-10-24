@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Models\Word;
+use App\Services\ArticleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,6 +14,12 @@ use Illuminate\Http\Request;
  */
 class ArticleController extends Controller
 {
+    public function __construct(
+        protected ArticleService $articleService
+    )
+    {
+    }
+
     /**
      * Получаем списки статей
      *
@@ -45,52 +53,15 @@ class ArticleController extends Controller
     /**
      * Запись в БД
      *
-     * @param Request $request
+     * @param ArticleRequest $request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(ArticleRequest $request): JsonResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:500',
-            'url' => 'required|string|max:500',
-            'text' => 'required|string',
-            'words' => 'required|array',
-            'size' => 'required|numeric',
-            'words_count' => 'required|integer',
-        ]);
+        $data = $request->validated();
 
-        // Создаем статью
-        $article = Article::create([
-            'title' => $request->title,
-            'url' => $request->url,
-            'text' => $request->text,
-            'words' => json_encode($request->words),
-            'size' => $request->size,
-            'words_count' => $request->words_count,
-        ]);
-
-        // Обрабатываем слова
-        foreach ($request->words as $word) {
-            // Находим или создаем слово
-            $wordModel = Word::firstOrCreate(['word' => $word]);
-
-            // Подсчитываем количество вхождений слова в тексте статьи без учета регистра
-            $textLower = mb_strtolower($request->text);
-            $wordLower = mb_strtolower($word);
-            $textCleaned = preg_replace('/[^\w\s]/u', ' ', $textLower);
-            $count = substr_count($textCleaned, $wordLower);
-
-            // Проверяем, существует ли связь со статьей
-            $existingEntry = $article->words()->where('word_id', $wordModel->id)->first();
-
-            if ($existingEntry) {
-                // Если связь существует, обновляем количество вхождений
-                $article->words()->updateExistingPivot($wordModel->id, ['count' => $existingEntry->pivot->count + $count]);
-            } else {
-                // Если связи нет, создаем новую
-                $article->words()->attach($wordModel->id, ['count' => $count]);
-            }
-        }
+        // Создаем статью в БД
+        $article = $this->articleService->createArticle($data);
 
         return response()->json($article->load('words'), 201);
     }
