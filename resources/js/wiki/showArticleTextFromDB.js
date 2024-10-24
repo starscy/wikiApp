@@ -5,6 +5,9 @@
  * @return {Promise<void>}
  */
 export async function showArticleTextFromDB(id) {
+    if (id === undefined) {
+        return;
+    }
     const resultContainer = document.getElementById('resultsTextContainer');
     resultContainer.style.display = 'flex';
     resultContainer.style.justifyContent = 'center';

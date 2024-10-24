@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laravel</title>
+    <title>Домашняя wikipedia</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -856,67 +856,10 @@
     @endif
 </head>
 <body>
-<div class="container">
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home"
-               aria-selected="true">Импорт статей</a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile"
-               aria-selected="false">Поиск</a>
-        </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            <form class="mt-10" onsubmit="handleClickWiki(event)">
-                <div class="mb-3 flex gap-3">
-                    <input type="text" class="form-control w-25" id="keyWord" placeholder="Ключевое слово">
-                    <button type="submit" class="btn btn-primary">Скопировать</button>
-                </div>
-                <div class="progress">
-                    <div id="progressWikiFetch" class="progress-bar w-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </form>
 
-            <!-- Элемент для отображения результата -->
-            <div id="result" class="mt-4 mb-4"></div>
+@yield('content')
 
-            <!-- Данные статей-->
-            <table class="table" id="articlesTableBody">
-                <!-- Здесь будет содержимое таблицы -->
-            </table>
-            <!--пагинатор-->
-            <div id="articles_paginator" class="mb-3 mt-12 d-flex justify-content-center">
-                <nav>
-                    <ul class="pagination">
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <form class="mt-10" onsubmit="handleClickFindArticle(event)">
-                <div class="mb-3 flex gap-3">
-                    <input id="searchInput" type="text" class="form-control w-25"  placeholder="Название статьи">
-                    <button type="submit" class="btn btn-primary">Найти</button>
-                </div>
-            </form>
-            <div class="flex gap-10">
-                <div id="resultsSearchContainer" class="flex-grow-0" style="min-width: 400px;"></div>
-                <div id="resultsTextContainer" class="flex-grow-1"></div>
-            </div>
-
-        </div>
-    </div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-<script>
-    // Вызов функции loadArticles после загрузки скрипта
-    document.addEventListener('DOMContentLoaded', () => {
-        loadArticles();
-    });
-</script>
 </body>
 </html>
 
