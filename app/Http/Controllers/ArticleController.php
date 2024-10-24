@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
-use App\Models\Word;
 use App\Services\ArticleService;
+use App\Services\ArticlesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 class ArticleController extends Controller
 {
     public function __construct(
+        protected ArticlesService $articlesService,
         protected ArticleService $articleService
     )
     {
@@ -74,31 +75,7 @@ class ArticleController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $keyword = $request->query('keyword');
-
-        // Поиск статей по словам-атомам
-        $articles = Article::whereHas('words', function ($query) use ($keyword) {
-            $query->where('word', $keyword);
-        })->with(['words' => function ($query) use ($keyword) {
-            $query->where('word', $keyword);
-        }])->get();
-
-        // Формируем результат с количеством вхождений
-        $articlesWithCounts = $articles->map(function ($article) use ($keyword) {
-            // Получаем количество вхождений из pivot таблицы
-            $wordEntry = $article->words()->firstWhere('word', $keyword);
-            $count = $wordEntry ? $wordEntry->pivot->count : 0;
-
-            return [
-                'id' => $article->id,
-                'title' => $article->title,
-                'url' => $article->url,
-                'text' => $article->text,
-                'word_count' => $count, // Добавляем количество вхождений
-            ];
-        });
-
-        $sortedArticles = $articlesWithCounts->sortByDesc('word_count');
+        $sortedArticles = $this->articlesService->searchArticlesByKeyword($request->query('keyword'));
 
         return response()->json($sortedArticles);
     }

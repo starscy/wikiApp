@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services;
 
@@ -24,7 +25,7 @@ class ArticleService
     public function createArticle(array $data): Article
     {
         $this->article = $this->createNewArticle($data);
-        $this->processWords($data['words'], $this->article);
+        $this->saveWordsToBD($data['words']);
         return $this->article;
     }
 
@@ -52,30 +53,30 @@ class ArticleService
     }
 
     /**
-     * Метод сохранение в базу данных количество вхождений слова
+     * Метод сохранение в базу слов и обновление данных количество вхождений слова в таблице article_word
      *
      * @param array $words
      * @param Article $article
      * @return void
      */
-    private function processWords(array $words, Article $article): void
+    private function saveWordsToBD(array $words): void
     {
         foreach ($words as $word) {
             // Находим или создаем слово
             $wordModel = Word::firstOrCreate(['word' => $word]);
 
             // Подсчитываем количество вхождений слова в тексте статьи без учета регистра
-            $count = $this->countWordsInText($wordModel);
+            $count = $this->countWordsInText($wordModel->word);
 
             // Проверяем, существует ли связь со статьей
-            $existingEntry = $article->words()->where('word_id', $wordModel->id)->first();
+            $existingEntry = $this->article->words()->where('word_id', $wordModel->id)->first();
 
             if ($existingEntry) {
                 // Если связь существует, обновляем количество вхождений
-                $article->words()->updateExistingPivot($wordModel->id, ['count' => $existingEntry->pivot->count + $count]);
+                $this->article->words()->updateExistingPivot($wordModel->id, ['count' => $count]);
             } else {
                 // Если связи нет, создаем новую
-                $article->words()->attach($wordModel->id, ['count' => $count]);
+                $this->article->words()->attach($wordModel->id, ['count' => $count]);
             }
         }
     }
@@ -83,17 +84,23 @@ class ArticleService
     /**
      * Метод подсчета количество вхождений слова в тексте статьи без учета регистра
      *
-     * @param Word $word - слово
-     * @return void
+     * @param string $word - слово
+     * @return int
      */
-    private function countWordsInText(Word $word): int
+    private function countWordsInText(string $word): int
     {
-        // Подсчитываем количество вхождений слова в тексте статьи без учета регистра
+        // Приводим текст и слово к нижнему регистру
         $textLower = mb_strtolower($this->article->text);
         $wordLower = mb_strtolower($word);
-        $textCleaned = preg_replace('/[^\w\s]/u', ' ', $textLower);
 
-        return substr_count($textCleaned, $wordLower);
+        // Используем регулярное выражение для подсчета вхождений слова
+        // \b обозначает границы слова
+        $pattern = '/\b' . preg_quote($wordLower, '/') . '\b/u';
+
+        // Подсчитываем количество вхождений
+        preg_match_all($pattern, $textLower, $matches);
+
+        return count($matches[0]);
     }
 }
 
