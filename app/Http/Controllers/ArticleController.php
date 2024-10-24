@@ -69,14 +69,6 @@ class ArticleController extends Controller
             'words_count' => $request->words_count,
         ]);
 
-        $text = "Привет, как дела? Как ты?";
-        $word = "как";
-        $textLower = mb_strtolower($text);
-        $wordLower = mb_strtolower($word);
-        $textCleaned = preg_replace('/[^\w\s]/u', ' ', $textLower);
-        $count = substr_count($textCleaned, $wordLower);
-
-
         // Обрабатываем слова
         foreach ($request->words as $word) {
             // Находим или создаем слово
