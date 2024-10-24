@@ -886,6 +886,13 @@
             <table class="table" id="articlesTableBody">
                 <!-- Здесь будет содержимое таблицы -->
             </table>
+            <!--пагинатор-->
+            <div id="articles_paginator" class="mb-3 mt-12 d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                    </ul>
+                </nav>
+            </div>
         </div>
 
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">

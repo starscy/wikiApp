@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * Статьи
  */
-class ArticleRequest extends FormRequest
+class ArticleStoreRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

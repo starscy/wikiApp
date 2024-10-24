@@ -8,3 +8,5 @@ import './progressBar';
 import './displaySearchResults';
 import './cleanParserString';
 import './showArticleTextFromDB';
+import './paginator';
+import './renderArticles';

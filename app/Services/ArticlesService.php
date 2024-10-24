@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace  App\Services;
 
 use App\Models\Article;
+use Illuminate\Support\Collection;
 
 /**
  * Сервис по работе со статьями
@@ -15,9 +16,9 @@ class ArticlesService
      * Поиск статей по словам-атомам
      *
      * @param string $keyword
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    public function searchArticlesByKeyword(string $keyword)
+    public function searchArticlesByKeyword(string $keyword): Collection
     {
         $articles = Article::whereHas('words', function ($query) use ($keyword) {
             $query->where('word', $keyword);

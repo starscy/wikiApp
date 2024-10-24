@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ArticleRequest;
+use App\Http\Requests\ArticleStoreRequest;
 use App\Models\Article;
 use App\Services\ArticleService;
 use App\Services\ArticlesService;
@@ -24,13 +25,22 @@ class ArticleController extends Controller
     /**
      * Получаем списки статей
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $articles = Article::all();
+        try {
+            $articles = Article::paginate($request->query('per_page', 10));
 
-        return response()->json($articles, 200);
+            if ($articles->isEmpty()) {
+                return response()->json(['message' => 'Статьи не найдены'], 404);
+            }
+
+            return response()->json($articles, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ошибка при получении статей'], 500);
+        }
     }
 
     /**
@@ -54,10 +64,10 @@ class ArticleController extends Controller
     /**
      * Запись в БД
      *
-     * @param ArticleRequest $request
+     * @param ArticleStoreRequest $request
      * @return JsonResponse
      */
-    public function store(ArticleRequest $request): JsonResponse
+    public function store(ArticleStoreRequest $request): JsonResponse
     {
         $data = $request->validated();
 
