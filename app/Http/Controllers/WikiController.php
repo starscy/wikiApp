@@ -1,11 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use App\Services\WikiService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use PhpParser\Error;
 
 /**
  *  Класс работает с wiki Api
@@ -13,62 +15,41 @@ use Illuminate\Http\Request;
 class WikiController extends Controller
 {
     /**
-     * @var Client
+     * @param WikiService $wikiService - вспомогательный сервис для запросов и работы с wikipedia
      */
-    protected Client $client;
-
-    public function __construct()
+    public function __construct(
+        protected WikiService $wikiService,
+    )
     {
-        $this->client = new Client();
     }
 
     /**
-     * Обрабатывает запросы к API Wikipedia.
+     * Отображение найденных статей по запросу значения.
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws GuzzleException
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
-        return $this->makeApiRequest($request);
+        return response()->json($this->wikiService->makeApiRequest($request->query()));
     }
 
     /**
-     * Метод парсинга контента
+     * Отображение спарсенных статей по запросу значения.
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws GuzzleException
+     * @throws Exception
      */
-    public function parse(Request $request)
-    {
-        $queryParams = array_merge($request->query(), [
-            'action' => 'parse',
-            'format' => 'json',
-            'prop' => 'text',
-            'section' => 0
-        ]);
-        return $this->makeApiRequest($request, $queryParams);
-    }
-
-    /**
-     * Выполняет запрос к API Wikipedia.
-     *
-     * @param Request $request
-     * @param array $queryParams
-     * @return JsonResponse
-     * @throws GuzzleException
-     */
-    protected function makeApiRequest(Request $request, array $queryParams = []): JsonResponse
+    public function parse(Request $request): JsonResponse
     {
         try {
-            $response = $this->client->request('GET', 'https://ru.wikipedia.org/w/api.php', [
-                'query' => $queryParams ?: $request->query(),
-            ]);
-            return response()->json(json_decode($response->getBody()->getContents()));
+            $queryParams = $this->wikiService->buildQueryParamsForParse($request->query()); //формируем параметры из запроса для парсинга
+            return response()->json($this->wikiService->makeApiRequest($queryParams));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при запросе к API: ' . $e->getMessage()], 500);
+            return response()->json(['message' => "Ошибка при парсинге статьи: $e"], 500);
         }
+
     }
 }

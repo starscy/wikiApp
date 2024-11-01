@@ -15,9 +15,13 @@ use Illuminate\Http\Request;
  */
 class ArticleController extends Controller
 {
+    /**
+     * @param ArticlesService $articlesService - сервис по работе со статьями
+     * @param ArticleService $articleService - сервис по работе со статьей
+     */
     public function __construct(
         protected ArticlesService $articlesService,
-        protected ArticleService $articleService
+        protected ArticleService  $articleService
     )
     {
     }
