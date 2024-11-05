@@ -75,8 +75,10 @@ class ArticleController extends Controller
     {
         $data = $request->validated();
 
+        session(['save-to-db-progress' => '1']);
         // Создаем статью в БД
         $article = $this->articleService->createArticle($data);
+        session(['save-to-db-progress' => '100']);
 
         return response()->json($article->load('words'), 201);
     }

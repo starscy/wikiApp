@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('article_word', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('article_id')->constrained()->onDelete('cascade');
-            $table->foreignId('word_id')->constrained()->onDelete('cascade');
+            $table->foreignId('article_id')->constrained()->onDelete('cascade')->index('state_article_id');
+            $table->foreignId('word_id')->constrained()->onDelete('cascade')->index('state_word_id');
             $table->integer('count'); // Количество вхождений
             $table->timestamps();
+
         });
     }
 

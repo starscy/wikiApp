@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\WikiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,10 @@ Route::prefix('articles')->group(function () {
     // Поиск статьи по ID
     Route::get('/show', [ArticleController::class, 'show']);
 });
+
+//запрос текущего прогресса по операции
+//Route::get('/get-progress', [ProgressController::class, 'getProgressFromDB']);
+
+Route::post('/save', [ArticleController::class, 'store']);
+Route::get('/get-progress', [ProgressController::class, 'getProgressFromDB']);
+

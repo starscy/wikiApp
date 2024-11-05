@@ -1,3 +1,5 @@
+import {updateProgressBar} from "./updateProgressBar.js";
+
 /**
  * ф-ия поиска статьи и передачи данных для сохранения в БД
  *
@@ -6,7 +8,7 @@
  */
 export async function handleClickWiki(event) {
     event.preventDefault();
-
+    // updateProgressBar();
     const keyWord = document.getElementById('keyWord').value;
 
     let data;
@@ -32,7 +34,7 @@ export async function handleClickWiki(event) {
         console.error('Ошибка при запросе:', error);
     }
 
-    progressBar('20'); //прогресс бар
+    progressBar('20'); //прогресс бар - запрос выполнен
 
     // Обработка ответа
     if (data && data.query && data.query.search.length > 0) {
@@ -46,9 +48,10 @@ export async function handleClickWiki(event) {
                     origin: '*', // Необходимо для CORS
                 }
             });
+
             const contentData = contentResponse.data;
 
-            progressBar('40'); //прогресс бар
+            progressBar('40'); //прогресс бар запрос на получение полного теста статьи - выполнен
 
             // Извлечение "голого" текста
             const plainText = contentData.parse.text['*'];
@@ -70,7 +73,7 @@ export async function handleClickWiki(event) {
             const articleSizeInKBytes = (articleSizeInBytes / 1024).toFixed(2); // Размер статьи в КБ
             const wordCount = words.length;
 
-            progressBar('60'); //прогресс бар
+            progressBar('60'); // прогресс бар разбиение на слова - выполнен
             // сохранения filteredText в базу данных
             const resultSaveData = await saveToDatabase(articleTitle, articleUrl, finalText, words, articleSizeInKBytes, wordCount);
 

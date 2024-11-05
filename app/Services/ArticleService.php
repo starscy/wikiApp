@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\Article;
 use App\Models\Word;
 
+
 /**
  * Сервис для работы со статьей
  */
@@ -61,24 +62,54 @@ class ArticleService
      */
     private function saveWordsToBD(array $words): void
     {
+        $wordCounts = [];
+        $wordIds = [];
+
         foreach ($words as $word) {
             // Находим или создаем слово
             $wordModel = Word::firstOrCreate(['word' => $word]);
+            $wordIds[] = $wordModel->id;
 
             // Подсчитываем количество вхождений слова в тексте статьи без учета регистра
             $count = $this->countWordsInText($wordModel->word);
+            $wordCounts[$wordModel->id] = $count;
+        }
 
-            // Проверяем, существует ли связь со статьей
-            $existingEntry = $this->article->words()->where('word_id', $wordModel->id)->first();
+        // Получаем существующие связи со статьей
+        $existingEntries = $this->article->words()->whereIn('word_id', $wordIds)->get()->keyBy('word_id');
 
-            if ($existingEntry) {
-                // Если связь существует, обновляем количество вхождений
-                $this->article->words()->updateExistingPivot($wordModel->id, ['count' => $count]);
+        $attachData = [];
+        $updateData = [];
+
+        foreach ($wordIds as $wordId) {
+            $count = $wordCounts[$wordId];
+
+            if (isset($existingEntries[$wordId])) {
+                $currentCount = $existingEntries[$wordId]->pivot->count; // Получаем текущее количество
+                // Если связь существует, добавляем в массив для обновления
+                $updateData[] = [
+                    'word_id' => $wordId,
+                    'count' => (int)$currentCount + (int)($count) ,
+                ];
             } else {
-                // Если связи нет, создаем новую
-                $this->article->words()->attach($wordModel->id, ['count' => $count]);
+                // Если связи нет, добавляем в массив для вставки
+                $attachData[] = [
+                    'word_id' => $wordId,
+                    'count' => $count,
+                ];
             }
         }
+
+        // Пакетная вставка новых записей
+        if (!empty($attachData)) {
+            $this->article->words()->attach($attachData);
+        }
+
+        // Пакетное обновление существующих записей
+        foreach ($updateData as $data) {
+            $this->article->words()->updateExistingPivot($data['word_id'], ['count' => $data['count']]);
+        }
+
     }
 
     /**

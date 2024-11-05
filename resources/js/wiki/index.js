@@ -10,3 +10,4 @@ import './cleanParserString';
 import './showArticleTextFromDB';
 import './paginator';
 import './renderArticles';
+import './updateProgressBar';
